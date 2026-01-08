@@ -1,28 +1,39 @@
 import streamlit as st
 import sqlite3
 
-st.title("Student Registration App with DB")
+st.title("Student Registration App")
 
-# Connect to database (create if not exists)
-conn = sqlite3.connect('students.db')
+# DB connect
+conn = sqlite3.connect("students.db")
 c = conn.cursor()
 
-# Create table if not exists
-c.execute('''
-    CREATE TABLE IF NOT EXISTS students(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        email TEXT
-    )
-''')
+# Create table
+c.execute("""
+CREATE TABLE IF NOT EXISTS students (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    email TEXT
+)
+""")
 conn.commit()
 
-# Input boxes
-name = st.text_input("Enter your Name")
-email = st.text_input("Enter your Email")
+# Inputs
+name = st.text_input("Enter Name")
+email = st.text_input("Enter Email")
 
-# Button
+# Insert data
 if st.button("Register"):
-    c.execute("INSERT INTO students (name, email) VALUES (?, ?)", (name, email))
+    c.execute(
+        "INSERT INTO students (name, email) VALUES (?, ?)",
+        (name, email)
+    )
     conn.commit()
-    st.success(f"Hello {name}, you are registered with email {email} 🎉")
+    st.success("Data saved successfully")
+
+# SHOW DATA
+st.subheader("Registered Students")
+
+c.execute("SELECT * FROM students")
+rows = c.fetchall()
+
+st.table(rows)
