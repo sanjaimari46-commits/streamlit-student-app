@@ -3,11 +3,13 @@ import sqlite3
 
 st.title("Student Registration App")
 
-# DB connect
+# -----------------------------
+# Database connection
+# -----------------------------
 conn = sqlite3.connect("students.db")
 c = conn.cursor()
 
-# Create table
+# Create table if not exists
 c.execute("""
 CREATE TABLE IF NOT EXISTS students (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,23 +19,43 @@ CREATE TABLE IF NOT EXISTS students (
 """)
 conn.commit()
 
-# Inputs
+# -----------------------------
+# Registration form (FOR ALL)
+# -----------------------------
+st.subheader("Student Registration")
+
 name = st.text_input("Enter Name")
 email = st.text_input("Enter Email")
 
-# Insert data
 if st.button("Register"):
-    c.execute(
-        "INSERT INTO students (name, email) VALUES (?, ?)",
-        (name, email)
-    )
-    conn.commit()
-    st.success("Data saved successfully")
+    if name.strip() == "" or email.strip() == "":
+        st.error("Please enter both name and email")
+    else:
+        c.execute(
+            "INSERT INTO students (name, email) VALUES (?, ?)",
+            (name, email)
+        )
+        conn.commit()
+        st.success("Registered successfully 🎉")
 
-# SHOW DATA
-st.subheader("Registered Students")
+# -----------------------------
+# Admin section (ONLY FOR YOU)
+# -----------------------------
+st.markdown("---")
+st.subheader("Admin Login")
 
-c.execute("SELECT * FROM students")
-rows = c.fetchall()
+admin_password = st.text_input("Enter admin password", type="password")
 
-st.table(rows)
+if admin_password == "admin123":   # 🔐 change this password if you want
+    st.success("Admin access granted")
+
+    c.execute("SELECT * FROM students")
+    rows = c.fetchall()
+
+    if len(rows) == 0:
+        st.info("No registrations yet")
+    else:
+        st.table(rows)
+
+elif admin_password != "":
+    st.error("Wrong password")
